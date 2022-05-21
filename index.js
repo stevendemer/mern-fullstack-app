@@ -3,9 +3,12 @@ const dotenv = require('dotenv').config();
 const port = process.env.PORT || 5000;
 const cors = require('cors');
 const goalsRouter = require('./routes/goalRoutes');
+const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
+
+connectDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
