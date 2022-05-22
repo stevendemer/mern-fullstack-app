@@ -1,2 +1,2 @@
-# MERN FULL STACK APPLICATION
-### CRUD operations with JWT authentication supported
+# ExpressJS backend API 
+### Using MongoDB 
