@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 import { FaUser } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { register, reset } from '../features/auth/authSlice';  
+import Spinner from "../components/Spinner";
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -11,6 +16,21 @@ const Register = () => {
 
     const { name, email, password, password2 } = formData;
 
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { user, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth);
+
+    useEffect(() => {
+        if (isError) {
+            toast.error(message);
+        } 
+        if (isSuccess || user) {
+            navigate('/'); // to dashboard
+        }
+        dispatch(reset());
+
+    }, [user, message, navigate, dispatch, isSuccess, isError]);
+
     const onChange = (e) => {
         setFormData((prev) => ({
             ...prev,
@@ -20,6 +40,19 @@ const Register = () => {
 
     const onSubmit = (e) => {
         e.preventDefault();
+        if (password !== password2) {
+            toast.error("Passwords do not match !");
+        } else {
+            // from the form data
+            const userData = {
+                name, email, password
+            };
+            dispatch(register(userData));
+        }
+    }
+
+    if (isLoading) {
+        return <Spinner />
     }
 
   return (
@@ -42,7 +75,7 @@ const Register = () => {
                     <input type="password" id="password" name="password" value={password} placeholder='Enter your password' className="form-control" onChange={onChange} />
                 </div>
                  <div className="form-group">
-                    <input type="password" id="password" name="password" value={password} placeholder='Confirm password' className="form-control" onChange={onChange} />
+                    <input type="password" id="password" name="password2" value={password2} placeholder='Confirm password' className="form-control" onChange={onChange} />
                 </div>
                 <div className="form-group">
                     <button type="submit" className="btn btn-block">Submit</button>

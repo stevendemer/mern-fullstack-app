@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
+const { deleteOne } = require('../models/userModel');
 
 const protect = asyncHandler(async (req, res, next) => {
     const authorization = req.get('authorization');
@@ -11,6 +12,10 @@ const protect = asyncHandler(async (req, res, next) => {
         authorization.startsWith('Bearer')
     ) {
         try {
+            let parts = authorization.split('.');
+            if (parts.length !== 3) {
+                return res.status(500).json({ message: "JWT Malformed" });
+            }
             // get token from header
             token = authorization.split(' ')[1];
             //verify the token
