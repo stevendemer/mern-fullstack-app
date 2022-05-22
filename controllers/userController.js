@@ -13,30 +13,29 @@ const registerUser = asyncHanlder(async (req, res) => {
     }
     // check if the user already exists in the db
     const foundUser = await User.findOne({ email });
+
     if (foundUser) {
         res.status(400);
         throw new Error("User already exists !");
     }
     // make sure the email is valid and the len(passwd) > 6
-    if (body('email').isEmail() && body('password').isLength({ min: 6 })) {
-        // hash the password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+    // if (body('email').isEmail() && body('password').isLength({ min: 6 })) {
+    // hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-        //create the user
-        const newUser = await User.create({
-            name,
-            email,
-            password: hashedPassword
-        });
-        if (newUser) {
-            res.status(201).json({ message: "New user created !", _id: newUser._id, name: newUser.name, email: newUser.email, token: generateToken() });
-        } else {
-            res.status(400);
-            throw new Error("Invalid user data !");
-        }
+    //create the user
+    const newUser = await User.create({
+        name,
+        email,
+        password: hashedPassword
+    });
+    if (newUser) {
+        res.status(201).json({ message: "New user created !", _id: newUser.id, name: newUser.name, email: newUser.email, token: generateToken(user._id) });
+    } else {
+        return res.status(400).json({ message: "Invalid user data !" });
     }
-    res.json({ message: "Registered new user !" })
+    return res.json({ message: "Registered new user !" })
 });
 
 const loginUser = asyncHanlder(async (req, res) => {
@@ -47,23 +46,25 @@ const loginUser = asyncHanlder(async (req, res) => {
 
     // check the password
     if (user && (await bcrypt.compare(password, user.password))) {
-        res.status(200).json({
-            _id: user._id,
+        return res.status(200).json({
+            _id: user.id,
             name: user.name,
             email: user.email,
             token: generateToken(user._id)
         })
     } else {
-        res.status(400);
-        throw new Error("Invalid credentials!");
+        return res.status(400).json({ message: "Invalid credentials" });
     }
 });
 
+
+// private route
 const getMe = asyncHanlder(async (req, res) => {
-    res.json({ message: "User profile" })
+    // const { _id, name, email } = await User.findById(req.user.id);
+    return res.status(200).json(req.user);
 });
 
-// generate a json web token
+// generate a JWT
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',

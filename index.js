@@ -6,7 +6,7 @@ const goalsRouter = require('./routes/goalRoutes');
 const usersRouter = require('./routes/userRoutes');
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
-const protect = require('./middleware/authMiddleware');
+const { protect } = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -17,8 +17,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 app.use('/api/goals', goalsRouter);
-app.use(protect);
 app.use('/api/users', usersRouter);
+
+// serve frontend
 
 app.use(errorHandler);
 
